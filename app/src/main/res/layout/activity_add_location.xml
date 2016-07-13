@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="edu.uoregon.cnf.tidetracker.AddLocationActivity">
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/latitudeEditText"
+        android:layout_marginBottom="161dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/latitudeTextView"
+        android:layout_alignStart="@+id/latitudeTextView"
+        android:layout_alignRight="@+id/latitudeTextView"
+        android:layout_alignEnd="@+id/latitudeTextView" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/longitudeEditText"
+        android:layout_below="@+id/latitudeTextView"
+        android:layout_alignLeft="@+id/longitudeTextView"
+        android:layout_alignStart="@+id/longitudeTextView"
+        android:layout_alignRight="@+id/longitudeTextView"
+        android:layout_alignEnd="@+id/longitudeTextView" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/locationNameEditText"
+        android:layout_marginBottom="100dp"
+        android:layout_above="@+id/latitudeTextView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/errorTextView"
+        android:layout_alignEnd="@+id/errorTextView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Location Name"
+        android:id="@+id/locationNameTextView"
+        android:layout_above="@+id/locationNameEditText"
+        android:layout_toLeftOf="@+id/longitudeTextView"
+        android:layout_toStartOf="@+id/longitudeTextView"
+        android:layout_marginBottom="40dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Latitude"
+        android:id="@+id/latitudeTextView"
+        android:layout_above="@+id/latitudeEditText"
+        android:layout_toLeftOf="@+id/locationCodeEditText"
+        android:layout_toStartOf="@+id/locationCodeEditText" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Longitude"
+        android:id="@+id/longitudeTextView"
+        android:layout_above="@+id/longitudeEditText"
+        android:layout_toRightOf="@+id/locationCodeEditText"
+        android:layout_toEndOf="@+id/locationCodeEditText" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/locationCodeEditText"
+        android:layout_below="@+id/locationCodeTextView"
+        android:layout_alignLeft="@+id/locationCodeTextView"
+        android:layout_alignStart="@+id/locationCodeTextView"
+        android:layout_alignRight="@+id/locationCodeTextView"
+        android:layout_alignEnd="@+id/locationCodeTextView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Location Code"
+        android:id="@+id/locationCodeTextView"
+        android:layout_alignTop="@+id/locationNameEditText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="59dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/errorTextView"
+        android:layout_below="@+id/longitudeEditText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="30dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Location"
+        android:id="@+id/addLocationButton"
+        android:layout_below="@+id/typeSpinner"
+        android:layout_centerHorizontal="true" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/typeSpinner"
+        android:layout_alignBaseline="@+id/errorTextView"
+        android:layout_alignBottom="@+id/errorTextView"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>

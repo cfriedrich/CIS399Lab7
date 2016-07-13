@@ -7,4 +7,8 @@
         <item>Gold Beach</item>
         <item>Newport</item>
     </string-array>
+    <string-array name="predictiontypes_array">
+        <item>Harmonic</item>
+        <item>Subordinate</item>
+    </string-array>
 </resources>

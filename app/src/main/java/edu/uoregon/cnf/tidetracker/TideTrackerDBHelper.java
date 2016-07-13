@@ -95,7 +95,7 @@ public class TideTrackerDBHelper extends SQLiteOpenHelper {
     public void insertPrediction(SQLiteDatabase db, DataItem item, String location, String locationCode, String locationLat, String locationLon)
     {
         
-        db.execSQL("INSERT OR IGNORE INTO " + LOCATION_TABLE + " VALUES (NULL, " + location + ", " + locationCode + ", "
+        db.execSQL("INSERT OR IGNORE INTO " + LOCATION_TABLE + " VALUES (NULL, " + location + ", " + locationCode +
                 ", " + locationLat + ", " + locationLon + " );");
 
         db.execSQL("INSERT INTO " + PREDICTION_TABLE + " VALUES (NULL, '" +

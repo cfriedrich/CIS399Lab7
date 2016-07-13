@@ -3,6 +3,7 @@ package edu.uoregon.cnf.tidetracker;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -34,6 +35,9 @@ public class TideTrackerDB {
     public static final String LOCATION_LON = "longitude";
     public static final int LOCATION_LON_COL = 4;
 
+    public static final String LOCATION_TYPE = "type";
+    public static final int LOCATION_TYPE_COL = 5;
+
     public static final String PREDICTION_ID = "predictionID";
     public static final int PREDICTION_ID_COL = 0;
 
@@ -61,7 +65,8 @@ public class TideTrackerDB {
                     LOCATION_NAME + " TEXT NOT NULL UNIQUE, " +
                     LOCATION_CODE + " TEXT NOT NULL UNIQUE, " +
                     LOCATION_LON + " TEXT NULL, " +
-                    LOCATION_LAT + " TEXT NULL;";
+                    LOCATION_LAT + " TEXT NULL, " +
+                    LOCATION_TYPE + " TEXT NULL);";
 
     public static final String CREATE_PREDICTION_TABLE =
             "CREATE TABLE " + PREDICTION_TABLE + " (" +
@@ -121,13 +126,58 @@ public class TideTrackerDB {
             Location location = new Location();
             location.setLocationID(cursor.getInt(LOCATION_ID_COL));
             location.setName(cursor.getString(LOCATION_NAME_COL));
-
+            location.setLocationCode(cursor.getString(LOCATION_CODE_COL));
+            location.setLongitude(cursor.getString(LOCATION_LON_COL));
+            location.setLatitude(cursor.getString(LOCATION_LAT_COL));
+            location.setPredictionType(cursor.getString(LOCATION_TYPE_COL));
             locations.add(location);
         }
         closeCursor(cursor);
         closeDB();
 
         return locations;
+    }
+
+    public boolean insertLocation(Location location)
+    {
+        openWriteableDB();
+        boolean successFlag = true;
+        try {
+            db.execSQL("INSERT OR IGNORE INTO " + LOCATION_TABLE + " VALUES (NULL, " + location.getName() + ", " +
+                    location.getLocationCode() + ", " + location.getLongitude() + ", " + location.getLatitude() + ", " +
+                    location.getPredictionType() + " );");
+        } catch (SQLException e) {
+            successFlag = false;
+        }
+
+        return successFlag;
+    }
+
+    // Grab the location ID based on an abbreviated location
+    public Location getLocationByCode(String locationCode) {
+
+        Location location = new Location();
+
+        openReadableDB();
+        String[] whereArgs = new String[]{
+                locationCode
+        };
+
+        String queryString = "SELECT * FROM locations WHERE code = ?;";
+        Cursor cursor = db.rawQuery(queryString, whereArgs);
+        if(cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            location.setLocationID(cursor.getInt(LOCATION_ID_COL));
+            location.setName(cursor.getString(LOCATION_NAME_COL));
+            location.setLocationCode(cursor.getString(LOCATION_CODE_COL));
+            location.setLongitude(cursor.getString(LOCATION_LON_COL));
+            location.setLatitude(cursor.getString(LOCATION_LAT_COL));
+            location.setPredictionType(cursor.getString(LOCATION_TYPE_COL));
+        }
+        closeCursor(cursor);
+        closeDB();
+
+        return location;
     }
 
     // Grab the location ID based on an abbreviated location
