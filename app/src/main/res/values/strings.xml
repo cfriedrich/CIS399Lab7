@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Tide Tracker</string>
+    <string-array name="locations_array">
+        <item>Select Location...</item>
+        <item>Astoria</item>
+        <item>Florence</item>
+        <item>Gold Beach</item>
+        <item>Newport</item>
+    </string-array>
+</resources>
