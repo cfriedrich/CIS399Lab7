@@ -21,6 +21,14 @@ public class Location {
         this.name = name;
     }
 
+    public Location(String name, String locationCode, String latitude, String longitude, String predictionType) {
+        this.name = name;
+        this.locationCode = locationCode;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.predictionType = predictionType;
+    }
+
     public int getLocationID() {
         return locationID;
     }

@@ -1,6 +1,7 @@
 package edu.uoregon.cnf.tidetracker;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -8,15 +9,26 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.ksoap2.transport.HttpTransportSE;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.net.HttpRetryException;
+import java.net.Proxy;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 public class SelectionActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -25,19 +37,43 @@ public class SelectionActivity extends AppCompatActivity implements View.OnClick
     private SimpleDateFormat day2OutFormat = new SimpleDateFormat(" dd, yyyy");
     private SimpleDateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
+    private SimpleDateFormat soapFormat = new SimpleDateFormat("yyyymmdd");
+
+
     private Spinner locationSpinner;
     private Button tideInfoButton;
     private DatePicker readingDatePicker;
+    private TideTrackerDB db;
+    private ArrayList<Location> locations;
+    private String selectedLocation;
+    private Cursor cursor;
+
+    private DAL dal = new DAL(this);
+
+    String formattedDate = "";
+    String formattedDate2 = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selection);
 
+        db = new TideTrackerDB(this);
+
         locationSpinner = (Spinner) findViewById(R.id.locationSpinner);
 
-        ArrayAdapter<CharSequence> adapter =
-                ArrayAdapter.createFromResource(this, R.array.locations_array, R.layout.spinner_item);
+        locations = new ArrayList<Location>();
+
+        // Get the predictions
+        locations.addAll(db.getLocations());
+
+        String[] locationNames = new String[locations.size()];
+        for(int i=0; i < locations.size(); i++)
+        {
+            locationNames[i] = locations.get(i).getName();
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, locationNames);
 
         adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
 
@@ -60,7 +96,7 @@ public class SelectionActivity extends AppCompatActivity implements View.OnClick
             }
             else
             {
-                String location = locationSpinner.getSelectedItem().toString();
+                String selectedLocation = locationSpinner.getSelectedItem().toString();
 
                 if(readingDatePicker.getYear() != 2016)
                 {
@@ -78,21 +114,30 @@ public class SelectionActivity extends AppCompatActivity implements View.OnClick
 
                     Date selectedDate =  calendar.getTime();
 
-                    String formattedDate = shortDateFormat.format(selectedDate);
+                    String soapFormattedDay1 = soapFormat.format(selectedDate);
+                    formattedDate = shortDateFormat.format(selectedDate);
                     String niceFormattedDate = niceDateOutFormat.format(selectedDate);
 
-                    String formattedDate2 = formattedDate;
+                    formattedDate2 = formattedDate;
+                    String soapFormattedDay2 = soapFormat.format(selectedDate);
                     if(month != 12 && day != 31)
                     {
                         calendar.add(Calendar.DATE, 1);
                         Date dayAfter = calendar.getTime();
+                        soapFormattedDay2 = soapFormat.format(dayAfter);
                         formattedDate2 = shortDateFormat.format(dayAfter);
                         niceFormattedDate = day1OutFormat.format(selectedDate) + day2OutFormat.format(dayAfter);
                     }
 
                     Intent intent = new Intent(this, ViewTidesActivity.class);
 
-                    intent.putExtra("location", location);
+                    if(db.getPredictions(selectedLocation, formattedDate, formattedDate2).size() == 0)
+                    {
+                        Location location = db.getLocationByName(selectedLocation);
+                        TideTask tideTask = new TideTask();
+                        tideTask.execute(location.getLocationCode(), soapFormattedDay1, soapFormattedDay2);		// get's the forecast and puts it in the db
+                    }
+                    intent.putExtra("location", selectedLocation);
                     intent.putExtra("date", formattedDate);
                     intent.putExtra("date2", formattedDate2);
                     intent.putExtra("niceDate", niceFormattedDate);
@@ -103,4 +148,85 @@ public class SelectionActivity extends AppCompatActivity implements View.OnClick
             }
         }
     }
+
+    public class TideTask extends AsyncTask<String, Void, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            // Create a SOAP request object and put it in an envelope
+            final String REQUEST_URL = "http://opendap.co-ops.nos.noaa.gov/axis/webservices/highlowtidepred/";
+            final String SOAP_OP = "waterlevelverifiedmonthly";
+            SoapObject request = new SoapObject(REQUEST_URL, SOAP_OP);
+            request.addProperty("stationId", params[0]);
+            request.addProperty("beginDate", params[1]);
+            request.addProperty("endDate", params[2]);
+            request.addProperty("datum", "MLLW");
+            request.addProperty("unit", "0");
+            request.addProperty("timeZone", "0");
+            request.addProperty("format", "xml");
+
+            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER12);
+            envelope.dotNet = true;
+            envelope.implicitTypes = true;
+            envelope.setOutputSoapObject(request);
+
+            // Send the request (call the SOAP method)
+
+            HttpTransportSE ht = new HttpTransportSE(REQUEST_URL);
+            ht.setXmlVersionTag("<!--?xml version=\"1.0\" encoding= \"UTF-8\" ?-->");
+            ht.debug = true;
+
+            try {
+                ht.call(REQUEST_URL + SOAP_OP, envelope); // first parameter is soapAction
+            } catch (HttpRetryException e) {
+
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+
+            // Get the response from the SOAP service
+			/*
+			// This works, but doesn't give us the raw XML
+			SoapObject response = null;
+			try {
+				response = (SoapObject)envelope.getResponse();
+			} catch (SoapFault e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			weatherXml = response.getPropertyAsString("GetCityForecastByZIPResult");
+			*/
+
+            // This gives us the raw XML
+            String predictionsXml = ht.responseDump;
+            return predictionsXml;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+
+            if (result.contains("resource cannot be found")) {
+                Toast.makeText(SelectionActivity.this, "Web Service:No data available", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                dal.fillDBWithLocationPredictions(result, selectedLocation);
+            }
+
+            ArrayList<Prediction> predictions = dal.getPredictionsFromDb(db, selectedLocation, formattedDate, formattedDate2);    // reads it back from the db
+            if (cursor.getCount() == 0) {
+                Toast.makeText(SelectionActivity.this, "Database:No data available", Toast.LENGTH_SHORT).show();
+            } else {
+                //adapter.changeCursor(cursor);
+            }
+        }
+
+    }
 }
+

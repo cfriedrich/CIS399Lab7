@@ -20,7 +20,6 @@ public class AddLocationActivity extends AppCompatActivity implements View.OnCli
     private EditText latitudeEditText;
     private EditText longitudeEditText;
     private TideTrackerDB db;
-    private TideTrackerDBHelper dbHelper;
     private Location location;
     private Spinner typeSpinner;
 
@@ -57,7 +56,7 @@ public class AddLocationActivity extends AppCompatActivity implements View.OnCli
         if(locationCodeEditText.getText().toString().length() > 0)
         {
             String locationCode = locationCodeEditText.getText().toString();
-            Location location = db.getLocationByCode(locationCode);
+//            Location location = db.getLocationByCode(locationCode);
             if(location != null)
             {
                 errorTextView.setText("Location already exists in the database");
@@ -79,16 +78,16 @@ public class AddLocationActivity extends AppCompatActivity implements View.OnCli
                     location.setLongitude(longitudeEditText.getText().toString());
                     location.setPredictionType(typeSpinner.getSelectedItem().toString());
 
-                    if(db.insertLocation(location))
-                    {
-                        Toast toast = Toast.makeText(this, "Location inserted", Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                    else
-                    {
-                        Toast toast = Toast.makeText(this, "Location insert failed", Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
+//                    if(db.insertLocation(location))
+//                    {
+//                        Toast toast = Toast.makeText(this, "Location inserted", Toast.LENGTH_SHORT);
+//                        toast.show();
+//                    }
+//                    else
+//                    {
+//                        Toast toast = Toast.makeText(this, "Location insert failed", Toast.LENGTH_SHORT);
+//                        toast.show();
+//                    }
                 }
 
             }

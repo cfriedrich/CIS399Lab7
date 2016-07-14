@@ -26,6 +26,8 @@ public class LoadingActivity extends AppCompatActivity {
     private final String FILE3NAME = "goldbeach_annual.xml";
     private final String FILE4NAME = "southbeach_annual.xml";
 
+    private ArrayList<Location> locationList;
+
     private Context context;
 
     private String[] files = {
@@ -47,6 +49,14 @@ public class LoadingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
 
+        Location location1 = new Location("Florence", "9434032", "+43.6750", "-124.1920", "Harmonic" );
+        Location location2 = new Location("Umpqua River Entrance, Half Moon Bay", "9433445", "+43.6750", "-124.1920", "Harmonic");
+
+        locationList = new ArrayList<Location>();
+
+        locationList.add(location1);
+        locationList.add(location2);
+
         loadingMessageTextView = (TextView)findViewById(R.id.loadingProgressTextView);
         loadingMessageTextView.setText("Reading Files...");
 
@@ -58,10 +68,10 @@ public class LoadingActivity extends AppCompatActivity {
         context = getApplicationContext();
 
         // Initialize FileIO
-        fileIO = new FileIO(context);
+//        fileIO = new FileIO(context);
 
         // Read the files
-        new ReadFiles().execute();
+        new PopulateDatabase().execute();
     }
 
     // Load Selection view after we're done setting up the data
@@ -71,27 +81,28 @@ public class LoadingActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // Read the file collection
-    class ReadFiles extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... params) {
-            dataCollection = fileIO.readAllFiles(files);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            // Update the display
-            loadingMessageTextView.setText("Populating Database...");
-            new PopulateDatabase().execute();
-        }
-    }
+//    // Read the file collection
+//    class ReadFiles extends AsyncTask<Void, Void, Void> {
+//        @Override
+//        protected Void doInBackground(Void... params) {
+////            dataCollection = fileIO.readAllFiles(files);
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void result) {
+//            // Update the display
+//            loadingMessageTextView.setText("Populating Database...");
+//            new PopulateDatabase().execute();
+//        }
+//    }
 
         class PopulateDatabase extends AsyncTask<Void, Void, Void> {
             @Override
             protected Void doInBackground(Void... params) {
                 // Put the data in the database
-                db.fillData(db, locations, dataCollection);
+                db.insertLocations(db, locationList);
+//                db.fillData(db, locations, dataCollection);
                 return null;
             }
 
