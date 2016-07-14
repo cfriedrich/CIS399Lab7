@@ -57,7 +57,8 @@ public class AddLocationActivity extends AppCompatActivity implements View.OnCli
         if(locationCodeEditText.getText().toString().length() > 0)
         {
             String locationCode = locationCodeEditText.getText().toString();
-            if(db.getLocationByCode(locationCode) != null)
+            Location location = db.getLocationByCode(locationCode);
+            if(location != null)
             {
                 errorTextView.setText("Location already exists in the database");
             }
