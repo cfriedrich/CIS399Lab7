@@ -201,9 +201,9 @@ public class TideTrackerDB {
         openWriteableDB();
         boolean successFlag = true;
         try {
-            db.execSQL("INSERT OR IGNORE INTO " + LOCATION_TABLE + " VALUES (NULL, " + location.getName() + ", " +
-                    location.getLocationCode() + ", " + location.getLongitude() + ", " + location.getLatitude() + ", " +
-                    location.getPredictionType() + " );");
+            db.execSQL("INSERT INTO " + LOCATION_TABLE + " VALUES ( NULL, '" + location.getName() + "', '" +
+                    location.getLocationCode() + "', '" + location.getLatitude() + "', '" + location.getLongitude() + "', '" +
+                    location.getPredictionType() + "' );");
         } catch (SQLException e) {
             successFlag = false;
         }
@@ -231,6 +231,10 @@ public class TideTrackerDB {
             location.setLongitude(cursor.getString(LOCATION_LON_COL));
             location.setLatitude(cursor.getString(LOCATION_LAT_COL));
             location.setPredictionType(cursor.getString(LOCATION_TYPE_COL));
+        }
+        else
+        {
+            return null;
         }
         closeCursor(cursor);
         closeDB();

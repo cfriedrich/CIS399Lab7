@@ -72,10 +72,11 @@ public class AddLocationActivity extends AppCompatActivity implements View.OnCli
                 }
                 else
                 {
+                    location = new Location();
                     location.setName(locationNameEditText.getText().toString());
                     location.setLocationCode(locationCodeEditText.getText().toString());
                     location.setLatitude(latitudeEditText.getText().toString());
-                    location.setLatitude(longitudeEditText.getText().toString());
+                    location.setLongitude(longitudeEditText.getText().toString());
                     location.setPredictionType(typeSpinner.getSelectedItem().toString());
 
                     if(db.insertLocation(location))
