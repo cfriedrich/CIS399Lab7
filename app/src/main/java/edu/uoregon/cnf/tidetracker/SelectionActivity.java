@@ -37,7 +37,7 @@ public class SelectionActivity extends AppCompatActivity implements View.OnClick
     private SimpleDateFormat day2OutFormat = new SimpleDateFormat(" dd, yyyy");
     private SimpleDateFormat shortDateFormat = new SimpleDateFormat("yyyy/MM/dd");
 
-    private SimpleDateFormat soapFormat = new SimpleDateFormat("yyyymmdd");
+    private SimpleDateFormat soapFormat = new SimpleDateFormat("yyyyMMdd");
 
 
     private Spinner locationSpinner;
@@ -149,36 +149,58 @@ public class SelectionActivity extends AppCompatActivity implements View.OnClick
         }
     }
 
+    private final SoapSerializationEnvelope getSoapSerializationEnvelope(SoapObject request) {
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.dotNet = true;
+        envelope.implicitTypes = true;
+        envelope.setAddAdornments(false);
+        envelope.setOutputSoapObject(request);
+
+        return envelope;
+    }
+
+    private static final String MAIN_REQUEST_URL = "http://opendap.co-ops.nos.noaa.gov/axis/services/highlowtidepred";
+
+    private final HttpTransportSE getHttpTransportSE() {
+        HttpTransportSE ht = new HttpTransportSE(Proxy.NO_PROXY,MAIN_REQUEST_URL,60000);
+        ht.debug = true;
+        ht.setXmlVersionTag("<!--?xml version=\"1.0\" encoding= \"UTF-8\" ?-->");
+        return ht;
+    }
+
     public class TideTask extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... params) {
 
             // Create a SOAP request object and put it in an envelope
-            final String REQUEST_URL = "http://opendap.co-ops.nos.noaa.gov/axis/webservices/highlowtidepred/";
-            final String SOAP_OP = "waterlevelverifiedmonthly";
-            SoapObject request = new SoapObject(REQUEST_URL, SOAP_OP);
+            final String NAMESPACE = "http://opendap.co-ops.nos.noaa.gov/axis/webservices/highlowtidepred/wsdl";
+            final String METHOD_NAME = "getHighLowTidePredictions";
+            final String URL = "http://opendap.co-ops.nos.noaa.gov/axis/services/highlowtidepred";
+            final String SOAP_ACTION = URL + "/" + METHOD_NAME;
+            SoapObject request = new SoapObject(URL, METHOD_NAME);
+//            SoapObject request = new SoapObject(URL, SOAP_ACTION);
             request.addProperty("stationId", params[0]);
             request.addProperty("beginDate", params[1]);
             request.addProperty("endDate", params[2]);
             request.addProperty("datum", "MLLW");
             request.addProperty("unit", "0");
             request.addProperty("timeZone", "0");
-            request.addProperty("format", "xml");
+//            request.addProperty("format", "xml");
 
-            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER12);
+
+            SoapSerializationEnvelope envelope = getSoapSerializationEnvelope(request);
             envelope.dotNet = true;
             envelope.implicitTypes = true;
             envelope.setOutputSoapObject(request);
 
             // Send the request (call the SOAP method)
-
-            HttpTransportSE ht = new HttpTransportSE(REQUEST_URL);
-            ht.setXmlVersionTag("<!--?xml version=\"1.0\" encoding= \"UTF-8\" ?-->");
-            ht.debug = true;
+            HttpTransportSE ht = getHttpTransportSE();
+//            ht.setXmlVersionTag("<!--?xml version=\"1.0\" encoding= \"UTF-8\" ?-->");
+//            ht.debug = true;
 
             try {
-                ht.call(REQUEST_URL + SOAP_OP, envelope); // first parameter is soapAction
+                ht.call(SOAP_ACTION, envelope); // first parameter is soapAction
             } catch (HttpRetryException e) {
 
             } catch (IOException e) {
